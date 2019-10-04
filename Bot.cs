@@ -33,7 +33,7 @@ namespace HockeyNewsBot
                 callback: new TimerCallback(GetNews),
                 state: null,
                 dueTime: new TimeSpan(0, 0, 0),
-                period: new TimeSpan(0, 15, 0)
+                period: new TimeSpan(0, 5, 0)
             );
         }
 

@@ -1,0 +1,10 @@
+[Unit]
+Description = Hockey News Bot
+
+[Service]
+WorkingDirectory=/opt/hockeynewsbot
+ExecStart = /usr/bin/dotnet /opt/hockeynewsbot/HockeyNewsBot.dll
+Restart = on-failure
+
+[Install]
+WantedBy = multi-user.target

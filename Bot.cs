@@ -81,7 +81,7 @@ namespace HockeyNewsBot
                 await db.SaveChangesAsync();
             }
 
-            //await SendNews(toSend);
+            await SendNews(toSend);
         }
 
         private async Task MessageReceivedAsync(SocketMessage message)

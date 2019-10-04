@@ -14,6 +14,7 @@ namespace HockeyNewsBot
         private string _token { get; set; }
         private Settings _settings { get; set; }
         private News _news { get; set; }
+        private Timer _newsTimer { get; set; }
         public Bot(Settings settings)
         {
             _settings = settings;
@@ -29,7 +30,7 @@ namespace HockeyNewsBot
             await _discordClient.LoginAsync(TokenType.Bot, _settings.DiscordBotToken);
             await _discordClient.StartAsync();
 
-            var newsTimer = new Timer(
+            _newsTimer = new Timer(
                 callback: new TimerCallback(GetNews),
                 state: null,
                 dueTime: new TimeSpan(0, 0, 0),
@@ -52,25 +53,35 @@ namespace HockeyNewsBot
 
                     if (!exists)
                     {
-                        var article = new Article
+                        try
                         {
-                            UuId = uuId,
-                            ArticleId = uuId,
-                            Headline = n.Attributes.Headline,
-                            Source = n.Attributes.SourceUrl.ToString(),
-                            Value = n.Attributes.News.Value,
-                            PublishedOn = DateTimeOffset.FromUnixTimeSeconds(n.Attributes.Created).DateTime.ToString("o")
-                        };
-                        toSend.Add(article);
+                            var article = new Article
+                            {
+                                UuId = uuId,
+                                ArticleId = uuId,
+                                Headline = n.Attributes.Headline,
+                                Source = n.Attributes.SourceUrl?.ToString() ?? "",
+                                Value = n.Attributes.News.Value,
+                                PublishedOn = DateTimeOffset.FromUnixTimeSeconds(n.Attributes.Created).DateTime.ToString("o")
+                            };
+                            toSend.Add(article);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            Console.WriteLine(ex.StackTrace);
+                        }
                     }
 
                 }
-
-                db.AddRange(toSend);
+                if (toSend.Count > 0)
+                {
+                    db.AddRange(toSend);
+                }
                 await db.SaveChangesAsync();
             }
 
-            await SendNews(toSend);
+            //await SendNews(toSend);
         }
 
         private async Task MessageReceivedAsync(SocketMessage message)
@@ -94,7 +105,7 @@ namespace HockeyNewsBot
             var channel = _discordClient.GetChannel(channelId) as IMessageChannel;
             foreach (var a in articles)
             {
-                await channel.SendMessageAsync($"{a.Headline}\n{a.Value}\n{a.Source}");
+                await channel.SendMessageAsync($"{a.Headline}\n{a.Value}\n{a.Source ?? ""}");
             }
         }
 

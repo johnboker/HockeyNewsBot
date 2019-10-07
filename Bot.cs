@@ -47,6 +47,12 @@ namespace HockeyNewsBot
             {
                 foreach (var n in data.NewsArticles)
                 {
+                    if(!n.Attributes.Injury)
+                    {
+                        // only see injury reports.
+                        continue;
+                    }
+
                     var uuId = n.Attributes.Uuid.ToString();
 
                     var exists = await db.Articles.AnyAsync(a => a.UuId == uuId);
